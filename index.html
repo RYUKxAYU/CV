@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive CV - Ayush Yadav</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony -->
+    <!-- Application Structure Plan: The SPA is structured as a single-page portfolio with a sticky navigation bar for easy access to key sections: Home, Skills, Experience, and Projects. This non-linear structure allows recruiters to quickly jump to the information most relevant to them. The flow begins with a strong hero section, moves to a visual representation of skills, follows a chronological experience timeline, and concludes with an interactive project gallery. This design was chosen for its modern feel and usability, turning a passive document into an engaging exploration of the candidate's profile. -->
+    <!-- Visualization & Content Choices: 
+        - Skills Section: Report Info -> Technical Skills list. Goal -> Compare/Inform. Viz -> Horizontal Bar Chart (Chart.js). Interaction -> Tooltips on hover show proficiency. Justification -> Visually quantifies skill levels, making them easier to parse than a simple list.
+        - Experience Section: Report Info -> Employment history. Goal -> Show chronological progression. Presentation -> Vertical timeline (HTML/Tailwind). Interaction -> Subtle hover effects. Justification -> An intuitive and standard way to present work history clearly.
+        - Projects Section: Report Info -> Project descriptions. Goal -> Organize/Inform. Presentation -> Grid of cards. Interaction -> "Details" button opens a modal with more info. Justification -> Keeps the main layout clean and scannable, while allowing for deep dives into specific projects upon user interaction.
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f7f4;
+            color: #2c3e50;
+        }
+        .nav-link {
+            transition: color 0.3s ease, border-color 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #3498db;
+            border-bottom-color: #3498db;
+        }
+        .card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 450px;
+            max-height: 60vh;
+        }
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .modal-overlay {
+            transition: opacity 0.3s ease;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header & Navigation -->
+    <header id="header" class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#home" class="text-xl font-bold text-gray-800">Ayush Yadav</a>
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#skills" class="nav-link font-medium pb-1">Skills</a>
+                <a href="#experience" class="nav-link font-medium pb-1">Experience</a>
+                <a href="#projects" class="nav-link font-medium pb-1">Projects</a>
+                <a href="#contact" class="nav-link font-medium pb-1">Contact</a>
+            </div>
+            <button id="mobile-menu-button" class="md:hidden focus:outline-none">
+                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4">
+             <a href="#skills" class="block py-2 text-center nav-link">Skills</a>
+             <a href="#experience" class="block py-2 text-center nav-link">Experience</a>
+             <a href="#projects" class="block py-2 text-center nav-link">Projects</a>
+             <a href="#contact" class="block py-2 text-center nav-link">Contact</a>
+        </div>
+    </header>
+
+    <main>
+        <!-- Home Section -->
+        <section id="home" class="min-h-[60vh] flex items-center bg-white">
+            <div class="container mx-auto px-6 py-16 text-center">
+                <h1 class="text-4xl md:text-6xl font-bold leading-tight">Ayush Yadav</h1>
+                <p class="text-lg md:text-xl text-gray-600 mt-4">Final-Year Computer Science Student</p>
+                <p class="max-w-3xl mx-auto mt-6 text-gray-700">
+                    Motivated and technically skilled, seeking to apply hands-on experience in machine learning, computer graphics, and smart contract development to solve real-world problems in scalable, impactful systems at Google.
+                </p>
+                <div class="mt-8 flex justify-center space-x-4">
+                    <a href="mailto:ayushyadav@example.com" class="bg-blue-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-600 transition-colors duration-300">Contact Me</a>
+                    <a href="#projects" class="bg-gray-200 text-gray-800 font-bold py-3 px-6 rounded-lg hover:bg-gray-300 transition-colors duration-300">View Projects</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Skills Section -->
+        <section id="skills" class="py-20">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold">Technical Skills</h2>
+                    <p class="text-lg text-gray-600 mt-4">A visual overview of my technical proficiencies. Hover over the bars for more details.</p>
+                </div>
+                <div class="chart-container bg-white p-4 rounded-lg shadow-lg">
+                    <canvas id="skillsChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Experience Section -->
+        <section id="experience" class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold">Experience & Education</h2>
+                    <p class="text-lg text-gray-600 mt-4">My professional journey and academic background.</p>
+                </div>
+                <div class="relative wrap overflow-hidden p-10 h-full">
+                    <div class="border-2-2 absolute border-opacity-20 border-gray-700 h-full border" style="left: 50%"></div>
+                    
+                    <!-- Right Timeline -->
+                    <div class="mb-8 flex justify-between items-center w-full right-timeline">
+                        <div class="order-1 w-5/12"></div>
+                        <div class="z-20 flex items-center order-1 bg-blue-500 shadow-xl w-8 h-8 rounded-full">
+                            <h1 class="mx-auto font-semibold text-lg text-white">1</h1>
+                        </div>
+                        <div class="order-1 bg-gray-100 rounded-lg shadow-xl w-5/12 px-6 py-4 card">
+                            <h3 class="font-bold text-gray-800 text-xl">Data Science Intern</h3>
+                            <p class="text-sm font-medium text-gray-600">Cognifyz Technologies (Remote) | June 2025 – Present</p>
+                            <ul class="list-disc list-inside mt-2 text-gray-700 space-y-1">
+                                <li>Completed 3 major tasks involving EDA and model building.</li>
+                                <li>Used Python and pandas to analyze real-world datasets.</li>
+                                <li>Documented projects thoroughly and shared actionable insights.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Left Timeline -->
+                    <div class="mb-8 flex justify-between flex-row-reverse items-center w-full left-timeline">
+                        <div class="order-1 w-5/12"></div>
+                        <div class="z-20 flex items-center order-1 bg-blue-500 shadow-xl w-8 h-8 rounded-full">
+                            <h1 class="mx-auto text-white font-semibold text-lg">2</h1>
+                        </div>
+                        <div class="order-1 bg-gray-100 rounded-lg shadow-xl w-5/12 px-6 py-4 card">
+                             <h3 class="font-bold text-gray-800 text-xl">ML + Blockchain Developer</h3>
+                            <p class="text-sm font-medium text-gray-600">Freelance Projects | Feb 2025 – Apr 2025</p>
+                            <ul class="list-disc list-inside mt-2 text-gray-700 space-y-1">
+                                <li>Integrated regression models with Solana smart contracts using Rust.</li>
+                                <li>Used TensorFlow to forecast outcomes via blockchain.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Timeline -->
+                     <div class="mb-8 flex justify-between items-center w-full right-timeline">
+                        <div class="order-1 w-5/12"></div>
+                        <div class="z-20 flex items-center order-1 bg-blue-500 shadow-xl w-8 h-8 rounded-full">
+                            <h1 class="mx-auto font-semibold text-lg text-white">3</h1>
+                        </div>
+                        <div class="order-1 bg-gray-100 rounded-lg shadow-xl w-5/12 px-6 py-4 card">
+                            <h3 class="font-bold text-gray-800 text-xl">B.Tech in Computer Science</h3>
+                            <p class="text-sm font-medium text-gray-600">XYZ University, India | Graduating 2025</p>
+                            <p class="mt-2 text-gray-700">Relevant Coursework: Machine Learning, Neural Networks, Data Structures, Computer Graphics, Blockchain.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Projects Section -->
+        <section id="projects" class="py-20">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold">Projects</h2>
+                    <p class="text-lg text-gray-600 mt-4">A selection of my work. Click for more details.</p>
+                </div>
+                <div id="project-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Project cards will be injected here by JavaScript -->
+                </div>
+            </div>
+        </section>
+        
+        <!-- Achievements & Certifications -->
+        <section id="achievements" class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold">Achievements & Certifications</h2>
+                </div>
+                <div class="grid md:grid-cols-2 gap-12">
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-center">Key Achievements</h3>
+                        <ul class="space-y-4">
+                            <li class="flex items-start card bg-gray-50 p-4 rounded-lg"><span class="text-green-500 font-bold mr-3">✔</span> Shortlisted for a Data Scientist role after independent data analysis.</li>
+                            <li class="flex items-start card bg-gray-50 p-4 rounded-lg"><span class="text-green-500 font-bold mr-3">✔</span> Top contributor to college hackathons with AI-integrated visual systems.</li>
+                            <li class="flex items-start card bg-gray-50 p-4 rounded-lg"><span class="text-green-500 font-bold mr-3">✔</span> Built and hosted public GitHub repositories for open project collaboration.</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-center">Top Certifications</h3>
+                        <ul class="space-y-4">
+                             <li class="flex items-start card bg-gray-50 p-4 rounded-lg"><span class="text-blue-500 font-bold mr-3">🎓</span> Neural Networks and Deep Learning – Coursera (Andrew Ng)</li>
+                             <li class="flex items-start card bg-gray-50 p-4 rounded-lg"><span class="text-blue-500 font-bold mr-3">🎓</span> Databases and SQL for Data Science with Python – IBM/Coursera</li>
+                             <li class="flex items-start card bg-gray-50 p-4 rounded-lg"><span class="text-blue-500 font-bold mr-3">🎓</span> Machine Learning Crash Course – Google Developers</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer id="contact" class="bg-gray-800 text-white py-16">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-3xl font-bold">Get In Touch</h2>
+            <p class="mt-4 max-w-xl mx-auto">I am currently available for internships and open to exciting opportunities. Feel free to reach out.</p>
+            <p class="text-2xl font-mono my-6"><a href="mailto:ayushyadav@example.com" class="hover:text-blue-400 transition-colors">ayushyadav@example.com</a></p>
+            <div class="flex justify-center space-x-6">
+                <a href="https://github.com/RYUKxAYU" target="_blank" class="hover:text-blue-400 transition-colors">GitHub</a>
+                <a href="#" class="hover:text-blue-400 transition-colors">LinkedIn</a>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Modal -->
+    <div id="project-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto card">
+            <div class="p-8">
+                <div class="flex justify-between items-start">
+                    <h3 id="modal-title" class="text-2xl font-bold text-gray-800 mb-4"></h3>
+                    <button id="modal-close" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button>
+                </div>
+                <p id="modal-description" class="text-gray-700 whitespace-pre-line"></p>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mobile Menu Toggle
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            // Skills Chart
+            const skillsCtx = document.getElementById('skillsChart').getContext('2d');
+            const skillsData = {
+                labels: ['Python', 'Java', 'JavaScript', 'Solidity', 'Rust', 'C++', 'TensorFlow', 'PyTorch', 'React.js', 'Smart Contracts'],
+                datasets: [{
+                    label: 'Proficiency',
+                    data: [95, 80, 85, 90, 75, 70, 90, 88, 82, 92],
+                    backgroundColor: 'rgba(52, 152, 219, 0.6)',
+                    borderColor: 'rgba(52, 152, 219, 1)',
+                    borderWidth: 1,
+                    hoverBackgroundColor: 'rgba(52, 152, 219, 0.9)',
+                }]
+            };
+            new Chart(skillsCtx, {
+                type: 'bar',
+                data: skillsData,
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ` Proficiency: ${context.raw}%`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + "%"
+                                }
+                            }
+                        },
+                        y: {
+                           ticks: {
+                                autoSkip: false
+                           }
+                        }
+                    }
+                }
+            });
+
+            // Projects Data
+            const projects = [
+                {
+                    title: "NCAA Tournament Predictor",
+                    description: `A Kaggle competition project focused on predicting outcomes for the 2025 NCAA basketball tournament.
+                    
+                    - Built an XGBoost-based model for high-accuracy predictions.
+                    - Engineered features like Elo ratings, seed differences, and recent performance metrics.
+                    - Optimized log loss through 10-fold cross-validation and data clipping techniques.`
+                },
+                {
+                    title: "AI Archaeological Site Discovery",
+                    description: `An entry for the OpenAI-Z Challenge that uses AI to find undiscovered archaeological sites.
+                    
+                    - Leveraged GPT-4 for text analysis and Folium for dynamic geospatial visualization.
+                    - Processed satellite imagery and historical texts to identify patterns of hidden sites.
+                    - Designed modular Python scripts with escalating refinement per iteration for improved accuracy.`
+                },
+                {
+                    title: "Computer Graphics Toolkit",
+                    description: `An academic project to build a comprehensive computer graphics toolkit from scratch.
+                    
+                    - Developed modules for various clipping algorithms, full rendering pipelines, and Bézier curve generation.
+                    - Built interactive input systems using mouse-event listeners for real-time manipulation.
+                    - Implemented 3D transformations, rendering logic, and custom shaders.`
+                },
+                {
+                    title: "Neural Style Transfer Art Generator",
+                    description: `A creative application that applies the artistic style of one image to another.
+                    
+                    - Implemented the Neural Style Transfer (NST) algorithm using PyTorch.
+                    - Integrated a user-friendly UI with adjustable intensity sliders for style control.
+                    - Enhanced visual output via post-processing techniques and trained on custom datasets.`
+                }
+            ];
+
+            const projectGrid = document.getElementById('project-grid');
+            const modal = document.getElementById('project-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalDescription = document.getElementById('modal-description');
+            const modalClose = document.getElementById('modal-close');
+
+            projects.forEach(project => {
+                const card = document.createElement('div');
+                card.className = 'bg-white p-6 rounded-lg shadow-lg card';
+                card.innerHTML = `
+                    <h3 class="font-bold text-xl mb-2">${project.title}</h3>
+                    <p class="text-gray-600 mb-4">${project.description.split('\n')[0]}</p>
+                    <button class="details-btn text-blue-500 font-semibold hover:underline">View Details →</button>
+                `;
+                projectGrid.appendChild(card);
+                
+                card.querySelector('.details-btn').addEventListener('click', () => {
+                    modalTitle.textContent = project.title;
+                    modalDescription.textContent = project.description;
+                    modal.classList.remove('hidden');
+                });
+            });
+
+            modalClose.addEventListener('click', () => modal.classList.add('hidden'));
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
